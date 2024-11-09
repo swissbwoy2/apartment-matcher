@@ -16,12 +16,6 @@
         "FLASK_ENV": "production",
         "FLASK_APP": "app.py"
     },
-    "functions": {
-        "api/wix-form-submission": {
-            "memory": 1024,
-            "maxDuration": 10
-        }
-    },
     "regions": ["cdg1"],
     "public": false
 }
