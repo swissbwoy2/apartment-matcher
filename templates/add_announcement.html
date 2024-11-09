@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une Annonce</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .help-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+        }
+        .section-title {
+            color: #495057;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active">Nouvelle annonce</li>
+                    </ol>
+                </nav>
+
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-plus-circle"></i> Ajouter une Nouvelle Annonce
+                        </h1>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="needs-validation" novalidate>
+                            <!-- Informations principales -->
+                            <h5 class="section-title">
+                                <i class="fas fa-info-circle"></i> Informations principales
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="title" 
+                                       name="title" 
+                                       placeholder="Titre de l'annonce"
+                                       required>
+                                <label for="title">Titre de l'annonce</label>
+                                <div class="invalid-feedback">
+                                    Veuillez saisir un titre pour l'annonce
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" 
+                                                id="property_type" 
+                                                name="property_type" 
+                                                required>
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="Appartement">Appartement</option>
+                                            <option value="Maison">Maison</option>
+                                            <option value="Studio">Studio</option>
+                                            <option value="Loft">Loft</option>
+                                            <option value="Villa">Villa</option>
+                                        </select>
+                                        <label for="property_type">Type de bien</label>
+                                        <div class="invalid-feedback">
+                                            Veuillez sélectionner un type de bien
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="price" 
+                                               name="price" 
+                                               placeholder="Prix"
+                                               min="0"
+                                               step="1000"
+                                               required>
+                                        <label for="price">Prix (CHF)</label>
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir un prix valide
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Caractéristiques -->
+                            <h5 class="section-title">
+                                <i class="fas fa-ruler-combined"></i> Caractéristiques
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="rooms" 
+                                               name="rooms" 
+                                               placeholder="Nombre de pièces"
+                                               min="1"
+                                               required>
+                                        <label for="rooms">Nombre de pièces</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="surface" 
+                                               name="surface" 
+                                               placeholder="Surface"
+                                               min="0"
+                                               step="0.5"
+                                               required>
+                                        <label for="surface">Surface (m²)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Localisation -->
+                            <h5 class="section-title">
+                                <i class="fas fa-map-marker-alt"></i> Localisation
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="address" 
+                                       name="address" 
+                                       placeholder="Adresse complète"
+                                       required>
+                                <label for="address">Adresse complète</label>
+                                <div class="help-text">
+                                    Rue, numéro, code postal, ville
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <h5 class="section-title">
+                                <i class="fas fa-align-left"></i> Description
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          name="description" 
+                                          style="height: 120px"
+                                          placeholder="Description détaillée"></textarea>
+                                <label for="description">Description détaillée</label>
+                                <div class="help-text">
+                                    Décrivez les points forts du bien, l'état, les équipements...
+                                </div>
+                            </div>
+
+                            <!-- Lien externe -->
+                            <h5 class="section-title">
+                                <i class="fas fa-link"></i> Lien externe
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <input type="url" 
+                                       class="form-control" 
+                                       id="link" 
+                                       name="link" 
+                                       placeholder="Lien vers l'annonce originale">
+                                <label for="link">Lien vers l'annonce originale</label>
+                                <div class="help-text">
+                                    URL de l'annonce sur un site immobilier
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="/" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Enregistrer l'annonce
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validation des formulaires Bootstrap
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ client.name }} - Détails Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            font-size: 0.9em;
+        }
+        .visit-card, .offer-card, .document-card {
+            transition: transform 0.2s;
+        }
+        .visit-card:hover, .offer-card:hover, .document-card:hover {
+            transform: translateY(-2px);
+        }
+        .document-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .document-icon {
+            font-size: 2rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- En-tête avec informations principales -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active">{{ client.name }}</li>
+                    </ol>
+                </nav>
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-user-circle"></i> {{ client.name }}
+                </h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Informations détaillées du client -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle"></i> Informations de contact
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-phone text-primary"></i>
+                                <strong>Contact:</strong> {{ client.contact }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-money-bill text-success"></i>
+                                <strong>Budget:</strong> CHF {{ "{:,.0f}".format(client.budget) if client.budget else "Non spécifié" }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-calendar text-info"></i>
+                                <strong>Client depuis:</strong> {{ client.created_at.strftime('%d/%m/%Y') }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-heart"></i> Préférences
+                        </h5>
+                        <p class="card-text">{{ client.preferences or "Aucune préférence spécifiée" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-alt"></i> Documents
+                        </h5>
+                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
+                            <i class="fas fa-plus"></i> Ajouter un document
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if client.documents %}
+                        <div class="row">
+                            {% for doc in client.documents %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card document-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title">
+                                                {% if doc.file_type in ['jpg', 'jpeg', 'png'] %}
+                                                <i class="fas fa-image text-primary"></i>
+                                                {% elif doc.file_type == 'pdf' %}
+                                                <i class="fas fa-file-pdf text-danger"></i>
+                                                {% else %}
+                                                <i class="fas fa-file-alt text-secondary"></i>
+                                                {% endif %}
+                                                {{ doc.original_filename }}
+                                            </h6>
+                                            <span class="badge bg-secondary">{{ doc.file_type }}</span>
+                                        </div>
+                                        {% if doc.description %}
+                                        <p class="card-text small">{{ doc.description }}</p>
+                                        {% endif %}
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                Ajouté le {{ doc.upload_date.strftime('%d/%m/%Y') }}
+                                            </small>
+                                        </p>
+                                        <div class="btn-group w-100">
+                                            <a href="{{ url_for('download_document', doc_id=doc.id) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-download"></i> Télécharger
+                                            </a>
+                                            <form action="{{ url_for('delete_document', doc_id=doc.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce document ?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Aucun document</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visites -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check"></i> Visites
+                        </h5>
+                        <a href="/add_visit" class="btn btn-light btn-sm">
+                            <i class="fas fa-plus"></i> Nouvelle visite
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if visits %}
+                        <div class="row">
+                            {% for visit in visits %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card visit-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="card-title">
+                                                {{ visit.announcement.title if visit.announcement else "Annonce non spécifiée" }}
+                                            </h6>
+                                            <span class="badge {% if visit.status == 'Planifiée' %}bg-warning{% elif visit.status == 'Effectuée' %}bg-success{% else %}bg-danger{% endif %} status-badge">
+                                                {{ visit.status }}
+                                            </span>
+                                        </div>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                {{ visit.date.strftime('%d/%m/%Y à %H:%M') }}
+                                            </small>
+                                        </p>
+                                        {% if visit.notes %}
+                                        <p class="card-text">{{ visit.notes }}</p>
+                                        {% endif %}
+                                        {% if visit.status == 'Planifiée' %}
+                                        <form action="/update_visit_status/{{ visit.id }}" method="POST" class="mt-2">
+                                            <select name="status" class="form-select form-select-sm mb-2">
+                                                <option value="Effectuée">Marquer comme effectuée</option>
+                                                <option value="Annulée">Annuler la visite</option>
+                                            </select>
+                                            <textarea name="feedback" class="form-control form-control-sm mb-2" placeholder="Feedback de la visite"></textarea>
+                                            <button type="submit" class="btn btn-primary btn-sm">Mettre à jour</button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Aucune visite programmée</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offres -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-contract"></i> Offres
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if offers %}
+                        <div class="row">
+                            {% for offer in offers %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card offer-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="card-title">
+                                                {{ offer.announcement.title if offer.announcement else "Annonce non spécifiée" }}
+                                            </h6>
+                                            <span class="badge {% if offer.status == 'En attente' %}bg-warning{% elif offer.status == 'Acceptée' %}bg-success{% else %}bg-danger{% endif %} status-badge">
+                                                {{ offer.status }}
+                                            </span>
+                                        </div>
+                                        <p class="card-text">
+                                            <strong>Montant:</strong> CHF {{ "{:,.0f}".format(offer.amount) }}
+                                        </p>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                {{ offer.date.strftime('%d/%m/%Y') }}
+                                            </small>
+                                        </p>
+                                        {% if offer.notes %}
+                                        <p class="card-text">
+                                            <small>{{ offer.notes }}</small>
+                                        </p>
+                                        {% endif %}
+                                        {% if offer.status == 'En attente' %}
+                                        <form action="/update_offer_status/{{ offer.id }}" method="POST" class="mt-2">
+                                            <select name="status" class="form-select form-select-sm">
+                                                <option value="Acceptée">Accepter</option>
+                                                <option value="Refusée">Refuser</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary btn-sm mt-2">Mettre à jour</button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Aucune offre en cours</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout Document -->
+    <div class="modal fade" id="addDocumentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('add_document', client_id=client.id) }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Document</label>
+                            <input type="file" class="form-control" id="document" name="document" required>
+                            <div class="form-text">
+                                Formats acceptés : PDF, DOC, DOCX, JPG, JPEG, PNG
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .help-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+        }
+        .document-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            margin: 0.5rem;
+        }
+        #preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .preview-item {
+            position: relative;
+            display: inline-block;
+        }
+        .remove-preview {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active">Nouveau client</li>
+                    </ol>
+                </nav>
+
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-user-plus"></i> Ajouter un Nouveau Client
+                        </h1>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
+                            <!-- Informations personnelles -->
+                            <h5 class="mb-3">
+                                <i class="fas fa-user"></i> Informations personnelles
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="name" 
+                                               name="name" 
+                                               placeholder="Nom complet"
+                                               required>
+                                        <label for="name">Nom complet</label>
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir le nom du client
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="contact" 
+                                               name="contact" 
+                                               placeholder="Téléphone ou email"
+                                               required>
+                                        <label for="contact">Contact</label>
+                                        <div class="invalid-feedback">
+                                            Veuillez saisir les coordonnées du client
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Budget -->
+                            <h5 class="mb-3 mt-4">
+                                <i class="fas fa-money-bill"></i> Information financière
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="budget" 
+                                       name="budget" 
+                                       placeholder="Budget maximum"
+                                       min="0"
+                                       step="1000">
+                                <label for="budget">Budget (CHF)</label>
+                                <div class="help-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Laissez vide si le budget n'est pas encore défini
+                                </div>
+                            </div>
+
+                            <!-- Préférences -->
+                            <h5 class="mb-3">
+                                <i class="fas fa-heart"></i> Préférences de recherche
+                            </h5>
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" 
+                                          id="preferences" 
+                                          name="preferences" 
+                                          style="height: 100px"
+                                          placeholder="Préférences du client"></textarea>
+                                <label for="preferences">Préférences</label>
+                                <div class="help-text">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Décrivez les critères recherchés : type de bien, localisation, nombre de pièces, etc.
+                                </div>
+                            </div>
+
+                            <!-- Documents -->
+                            <h5 class="mb-3">
+                                <i class="fas fa-file-alt"></i> Documents
+                            </h5>
+                            <div class="mb-3">
+                                <label for="documents" class="form-label">Ajouter des documents</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="documents" 
+                                       name="documents" 
+                                       multiple
+                                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                <div class="help-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Formats acceptés : PDF, DOC, DOCX, JPG, JPEG, PNG
+                                </div>
+                                <div id="preview-container"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="doc_description" class="form-label">Description des documents</label>
+                                <textarea class="form-control" 
+                                          id="doc_description" 
+                                          name="doc_description" 
+                                          rows="2"
+                                          placeholder="Description optionnelle des documents"></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="/" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer le client
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validation des formulaires Bootstrap
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+
+        // Prévisualisation des documents
+        document.getElementById('documents').addEventListener('change', function(e) {
+            const container = document.getElementById('preview-container');
+            container.innerHTML = '';
+            
+            Array.from(this.files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'preview-item';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="document-preview">
+                            <span class="remove-preview" data-index="${index}">&times;</span>
+                        `;
+                        container.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `
+                        <div class="document-preview d-flex align-items-center justify-content-center bg-light border">
+                            <i class="fas fa-file fa-2x text-secondary"></i>
+                        </div>
+                        <span class="remove-preview" data-index="${index}">&times;</span>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+        });
+
+        // Suppression des prévisualisations
+        document.getElementById('preview-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-preview')) {
+                const index = e.target.dataset.index;
+                const input = document.getElementById('documents');
+                const dt = new DataTransfer();
+                
+                Array.from(input.files).forEach((file, i) => {
+                    if (i != index) dt.items.add(file);
+                });
+                
+                input.files = dt.files;
+                e.target.parentElement.remove();
+            }
+        });
+    </script>
+</body>
+</html>

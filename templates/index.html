@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Immobilière</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .stats-card {
+            transition: transform 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .announcement-card {
+            transition: all 0.3s;
+        }
+        .announcement-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .badge-disponible {
+            background-color: #28a745;
+        }
+        .badge-reserve {
+            background-color: #ffc107;
+        }
+        .badge-vendu {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- En-tête et Recherche -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-3">Tableau de Bord</h1>
+                <form class="d-flex gap-2" method="get">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="{{ search_query }}">
+                    <select name="status" class="form-select" style="width: auto;">
+                        <option value="">Tous les statuts</option>
+                        <option value="Disponible" {% if status_filter == 'Disponible' %}selected{% endif %}>Disponible</option>
+                        <option value="Réservé" {% if status_filter == 'Réservé' %}selected{% endif %}>Réservé</option>
+                        <option value="Vendu" {% if status_filter == 'Vendu' %}selected{% endif %}>Vendu</option>
+                    </select>
+                    <select name="sort" class="form-select" style="width: auto;">
+                        <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Date</option>
+                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Prix ↑</option>
+                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Prix ↓</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-users"></i> Clients
+                        </h5>
+                        <h2>{{ stats.total_clients }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-home"></i> Annonces
+                        </h5>
+                        <h2>{{ stats.total_announcements }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card bg-warning text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-calendar"></i> Visites
+                        </h5>
+                        <h2>{{ stats.active_visits }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-file-contract"></i> Offres
+                        </h5>
+                        <h2>{{ stats.pending_offers }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Rapides -->
+        <div class="row mb-4">
+            <div class="col">
+                <a href="/add_client" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Nouveau Client
+                </a>
+                <a href="/add_announcement" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> Nouvelle Annonce
+                </a>
+                <a href="/add_visit" class="btn btn-warning">
+                    <i class="fas fa-calendar-plus"></i> Nouvelle Visite
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Liste des Clients -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users"></i> Clients Récents
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for client in clients %}
+                            <a href="/client/{{ client.id }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ client.name }}</h6>
+                                    <small class="text-muted">{{ client.contact }}</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ client.visits|length }} visites
+                                </span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des Annonces -->
+            <div class="col-md-8">
+                <h3 class="mb-3">Annonces Immobilières</h3>
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for announcement in announcements %}
+                    <div class="col">
+                        <div class="card announcement-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ announcement.title }}</h5>
+                                <span class="badge {% if announcement.status == 'Disponible' %}badge-disponible{% elif announcement.status == 'Réservé' %}badge-reserve{% else %}badge-vendu{% endif %}">
+                                    {{ announcement.status }}
+                                </span>
+                                <p class="card-text mt-2">
+                                    <strong>Prix:</strong> CHF {{ "{:,.0f}".format(announcement.price) }}<br>
+                                    <strong>Surface:</strong> {{ announcement.surface }}m²<br>
+                                    <strong>Pièces:</strong> {{ announcement.rooms }}
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt"></i> {{ announcement.address }}
+                                    </small>
+                                </p>
+                                {% if announcement.link %}
+                                <a href="{{ announcement.link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt"></i> Voir l'annonce
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer text-muted">
+                                Ajouté le {{ announcement.date_added.strftime('%d/%m/%Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

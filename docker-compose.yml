@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///apartments.db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - scheduler
+
+  scheduler:
+    build: .
+    volumes:
+      - .:/app
+    command: python scheduler.py
+    environment:
+      - DATABASE_URL=sqlite:///apartments.db
