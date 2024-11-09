@@ -24,12 +24,14 @@ CORS(app, resources={
 # Configuration
 is_vercel = os.environ.get('VERCEL', False)
 if is_vercel:
-    # Configuration pour Vercel
-    db_path = '/tmp/real_estate.db'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    # Configuration pour Vercel avec PostgreSQL
+    DATABASE_URL = os.environ.get('POSTGRES_URL', '')
+    if not DATABASE_URL:
+        raise ValueError("POSTGRES_URL environment variable is not set")
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 else:
-    # Configuration locale
+    # Configuration locale avec SQLite
     db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'real_estate.db'))
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{db_path}')
     app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', os.path.join(os.path.dirname(db_path), 'uploads'))
@@ -420,8 +422,9 @@ def deploy_complete():
 
 if __name__ == '__main__':
     # S'assurer que les répertoires nécessaires existent
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    if not is_vercel:
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
     with app.app_context():
         # Créer une nouvelle base de données avec le schéma à jour
